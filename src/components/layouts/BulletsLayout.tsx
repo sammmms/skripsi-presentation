@@ -13,7 +13,7 @@ export function BulletsLayout({ slide }: { slide: BulletsSlide }) {
         {slide.lead && (
           <RichText
             text={slide.lead}
-            className="mb-5 block max-w-3xl text-pretty text-base leading-relaxed text-ink-soft sm:text-lg"
+            className="mb-5 block max-w-3xl text-pretty text-base leading-relaxed text-ink-soft sm:text-lg lg:text-xl"
           />
         )}
 

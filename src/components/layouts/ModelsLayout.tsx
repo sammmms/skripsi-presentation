@@ -19,7 +19,7 @@ export function ModelsLayout({ slide }: { slide: ModelsSlide }) {
         {slide.lead && (
           <RichText
             text={slide.lead}
-            className="block max-w-3xl text-pretty text-base leading-relaxed text-ink-soft sm:text-lg"
+            className="block max-w-3xl text-pretty text-base leading-relaxed text-ink-soft sm:text-lg lg:text-xl"
           />
         )}
 

@@ -52,7 +52,7 @@ export function DemoLayout({ slide }: { slide: DemoSlide }) {
             {slide.lead && (
               <RichText
                 text={slide.lead}
-                className="block text-pretty text-base leading-relaxed text-ink-soft sm:text-lg"
+                className="block text-pretty text-base leading-relaxed text-ink-soft sm:text-lg lg:text-xl"
               />
             )}
             {slide.bullets && slide.bullets.length > 0 && (

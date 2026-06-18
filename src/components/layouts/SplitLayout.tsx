@@ -29,7 +29,7 @@ function SplitPanel({ panel, delay }: { panel: Panel; delay: number }) {
       {panel.lead && (
         <RichText
           text={panel.lead}
-          className="mt-2 block text-pretty text-sm leading-relaxed text-ink-soft sm:text-base"
+          className="mt-2 block text-pretty text-sm leading-relaxed text-ink-soft sm:text-base lg:text-lg"
         />
       )}
       <div className="mt-4">

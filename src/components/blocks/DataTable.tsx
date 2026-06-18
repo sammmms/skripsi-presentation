@@ -18,14 +18,14 @@ export function DataTable({ table, className = '' }: { table: TableSpec; classNa
       {/* Desktop / tablet: real table -------------------------------------- */}
       <div className="hidden overflow-hidden rounded-card border border-border md:block">
         <div className="max-h-full overflow-auto no-scrollbar">
-          <table className="w-full border-collapse text-sm">
+          <table className="w-full border-collapse text-sm lg:text-base xl:text-lg">
             <thead className="sticky top-0 z-10">
               <tr className="bg-surface-3/95 backdrop-blur">
                 {columns.map((col) => (
                   <th
                     key={col.key}
                     scope="col"
-                    className={`whitespace-nowrap border-b border-border-strong px-4 py-3 font-display text-xs font-semibold uppercase tracking-wide text-ink-soft ${alignClass(
+                    className={`whitespace-nowrap border-b border-border-strong px-4 py-3 font-display text-xs font-semibold uppercase tracking-wide text-ink-soft lg:text-sm ${alignClass(
                       col.align,
                     )}`}
                   >
@@ -53,7 +53,7 @@ export function DataTable({ table, className = '' }: { table: TableSpec; classNa
                       return (
                         <td
                           key={col.key}
-                          className={`border-b border-border/60 px-4 py-2.5 ${alignClass(
+                          className={`border-b border-border/60 px-4 py-2.5 lg:py-3.5 ${alignClass(
                             col.align,
                           )} ${isNumeric ? 'font-mono tabular-nums' : ''} ${
                             isHi ? 'font-medium text-ink' : 'text-ink-soft'
@@ -116,7 +116,7 @@ export function DataTable({ table, className = '' }: { table: TableSpec; classNa
         })}
       </div>
 
-      {caption && <p className="mt-3 text-center text-sm text-muted">{caption}</p>}
+      {caption && <p className="mt-3 text-center text-sm text-muted lg:text-base">{caption}</p>}
     </div>
   )
 }

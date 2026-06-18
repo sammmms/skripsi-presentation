@@ -17,7 +17,7 @@ export function ModelCard({
 
   return (
     <motion.article
-      className={`surface-card relative flex flex-col overflow-hidden p-5 ${className}`}
+      className={`surface-card relative flex flex-col overflow-hidden p-5 lg:p-6 ${className}`}
       style={{
         borderColor: `color-mix(in srgb, ${color} 40%, var(--color-border))`,
         boxShadow: `0 0 32px -18px ${color}`,
@@ -32,10 +32,10 @@ export function ModelCard({
 
       <header className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-display text-lg font-semibold leading-tight text-ink">
+          <h3 className="font-display text-lg font-semibold leading-tight text-ink lg:text-xl xl:text-2xl">
             {model.name}
           </h3>
-          <p className="mt-0.5 text-sm text-muted">{model.tagline}</p>
+          <p className="mt-0.5 text-sm text-muted lg:text-base">{model.tagline}</p>
         </div>
         {model.params && (
           <span
@@ -47,10 +47,10 @@ export function ModelCard({
         )}
       </header>
 
-      <ul className="flex flex-1 flex-col gap-1.5 text-sm text-ink-soft">
+      <ul className="flex flex-1 flex-col gap-1.5 text-sm text-ink-soft lg:gap-2 lg:text-base xl:text-lg">
         {model.points.map((point, i) => (
           <li key={i} className="flex items-start gap-2">
-            <Icon name="Dot" className="mt-0.5 size-4 shrink-0" style={{ color }} />
+            <Icon name="Dot" className="mt-0.5 size-4 shrink-0 lg:size-5" style={{ color }} />
             <span className="text-pretty leading-snug">{point}</span>
           </li>
         ))}
@@ -62,12 +62,12 @@ export function ModelCard({
           style={{ background: toneFill(model.tone, 12) }}
         >
           <span
-            className="font-display text-2xl font-semibold tabular-nums leading-none"
+            className="font-display text-2xl font-semibold tabular-nums leading-none lg:text-3xl"
             style={{ color }}
           >
             {model.metric.value}
           </span>
-          <span className="text-xs text-muted">{model.metric.label}</span>
+          <span className="text-xs text-muted lg:text-sm">{model.metric.label}</span>
         </div>
       )}
     </motion.article>
