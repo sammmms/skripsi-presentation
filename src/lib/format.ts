@@ -6,10 +6,13 @@ export function fmt(value: number, decimals = 0, signed = false): string {
   return `${sign}${fixed}`
 }
 
-/** Formats a cell value for the data table (numbers get comma separators,
- *  strings pass through verbatim — they may already be pre-formatted). */
+/** Formats a cell value for the data table. Integers stay whole (counts like
+ *  3, 2, 4); non-integers get 3-decimal comma formatting (e.g. 0,969). Strings
+ *  pass through verbatim — they may already be pre-formatted. */
 export function formatCell(value: string | number): string {
-  if (typeof value === 'number') return fmt(value, 3)
+  if (typeof value === 'number') {
+    return Number.isInteger(value) ? String(value) : fmt(value, 3)
+  }
   return value
 }
 
