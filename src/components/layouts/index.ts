@@ -1,0 +1,15 @@
+/* Barrel for all slide layout components + shared frame & transition. */
+export { SlideShell } from './SlideShell'
+export { SlideTransition } from './SlideTransition'
+
+export { CoverLayout } from './CoverLayout'
+export { OutlineLayout } from './OutlineLayout'
+export { BulletsLayout } from './BulletsLayout'
+export { SplitLayout } from './SplitLayout'
+export { FigureLayout } from './FigureLayout'
+export { FlowLayout } from './FlowLayout'
+export { TableLayout } from './TableLayout'
+export { ModelsLayout } from './ModelsLayout'
+export { ChartLayout } from './ChartLayout'
+export { DemoLayout } from './DemoLayout'
+export { ClosingLayout } from './ClosingLayout'

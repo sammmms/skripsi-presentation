@@ -8,7 +8,7 @@ Naomi Prisella · Giovanny Halimko · Samuel Onasis — Universitas Mikroskil, M
 
 A static, animated slide deck (24 slides) with a left navigation sidebar, designed to be opened on a phone, tablet, or projector. Content mirrors the thesis defense script.
 
-> **Status:** repository initialized. The application is **not scaffolded yet** — this initial commit contains the README and project metadata only. App code lands in subsequent commits.
+> **Status:** scaffolded and building. The full React 19 + Vite 7 + TypeScript app is implemented — all 24 data-driven slides, reusable layouts/blocks, interactive SVG charts, navigation chrome (sidebar, overview, presenter notes, keyboard/swipe/wheel, deep-links), and PWA. `npm install && npm run dev` to run; `npm run build` produces `dist/`.
 
 ---
 
@@ -74,9 +74,22 @@ Deploy on **Vercel** (framework preset: Vite, build `npm run build`, output `dis
 
 ## Content & assets
 
+**Source of truth:** all slide content, results data, and figures are derived from the sibling thesis repository at **`../skripsi`** (`Documents/GitHub/skripsi`). When the thesis updates, re-derive from there — do not invent numbers. See **[`HANDOFF.md`](./HANDOFF.md)** for the full handoff, data provenance, outstanding setup items, and the two-repo sync protocol (it is cross-linked with the thesis handoff `../skripsi/documents/HANDOFF_Finalisasi_BAB_II-IV_2026-06-17.md`).
+
+| Need | Source in `Documents/GitHub/skripsi` |
+|---|---|
+| Slide-by-slide script & speaker notes | `documents/PRESENTASI_Sidang_2026-06-17.md` |
+| Results narrative (RM1–RM3, discussion) | `documents/BAB_IV_Hasil_dan_Pembahasan_2026-06-17.md` |
+| Exact result numbers (AUC / recall / F1 / Δ) | `documents/table/tabel_4_2…4_6_*.html` |
+| Method / dataset / experiment design | `documents/PRESENTASI_Sidang_*.md`, `documents/BAB_III_*` |
+| Q&A defense prep | `documents/PANDUAN_SIDANG_QnA_Teknis_2026-06-17.md` |
+| Figures (PNG) | `documents/media_v2/gambar_*.png` |
+| Live demo | Hugging Face Spaces — `thesissufferer/deepfake-detection-demo` |
+
 - Slide content is authored from the thesis defense script (`PRESENTASI_Sidang_*.md`).
-- Thesis figures are curated into `public/figures/` with stable names.
-- **Note (figure mapping):** the thesis figure numbers do not match the source PNG filenames one-to-one, and the confusion-matrix / training-curve figures are not finalized yet. Slides referencing those render a labeled placeholder until the real images are dropped in.
+- Thesis figures are curated into `public/figures/` with stable names (see `src/data/figures.ts` for the mapping).
+- All quantitative results live in `src/data/results.ts`, transcribed verbatim from the BAB IV tables above (n = 750, mean over 3 seeds), and drive the interactive charts.
+- **Note (figure mapping):** the thesis figure numbers do not match the source PNG filenames one-to-one, and the confusion-matrix / training-curve figures (Gambar 4.9 / 4.10) are not finalized yet. Slides referencing those render a labeled placeholder until the real images are dropped in.
 
 ---
 

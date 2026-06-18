@@ -1,0 +1,131 @@
+@import 'tailwindcss';
+
+/* ============================================================================
+   Academic dark theme — THE ONLY RESTYLE FILE.
+   Tailwind v4 design tokens. Edit a value here and it reflects everywhere.
+   Semantics:  cyan = spatial · violet = frequency · indigo = hybrid.
+   ========================================================================== */
+@theme {
+  /* Surfaces & ink ---------------------------------------------------------*/
+  --color-bg: #0a0e1a;
+  --color-bg-2: #0c1222;
+  --color-surface: #111829;
+  --color-surface-2: #18203a;
+  --color-surface-3: #1f2947;
+  --color-border: #283356;
+  --color-border-strong: #3a4978;
+
+  --color-ink: #eef2fb;
+  --color-ink-soft: #c4cde2;
+  --color-muted: #8d9abc;
+  --color-faint: #5d6a8c;
+
+  /* Domain semantics -------------------------------------------------------*/
+  --color-spatial: #22d3ee;       /* cyan   — spatial / XceptionNet */
+  --color-spatial-soft: #67e8f9;
+  --color-frequency: #a78bfa;     /* violet — frequency / FFT */
+  --color-frequency-soft: #c4b5fd;
+  --color-hybrid: #818cf8;        /* indigo — hybrid fusion */
+  --color-hybrid-soft: #a5b4fc;
+
+  /* Status -----------------------------------------------------------------*/
+  --color-good: #34d399;
+  --color-warn: #fbbf24;
+  --color-bad: #fb7185;
+
+  /* Per-section accents (Pendahuluan → Penutup) ----------------------------*/
+  --color-sec-intro: #38bdf8;
+  --color-sec-theory: #a78bfa;
+  --color-sec-method: #818cf8;
+  --color-sec-results: #2dd4bf;
+  --color-sec-conclusion: #fb923c;
+  --color-sec-closing: #fbbf24;
+
+  /* Typography -------------------------------------------------------------*/
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Sora Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Motion -----------------------------------------------------------------*/
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Radii / shadow ---------------------------------------------------------*/
+  --radius-card: 1rem;
+  --shadow-card: 0 18px 50px -24px rgba(0, 0, 0, 0.7);
+  --shadow-glow-spatial: 0 0 40px -12px rgba(34, 211, 238, 0.45);
+  --shadow-glow-frequency: 0 0 40px -12px rgba(167, 139, 250, 0.45);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1100px 700px at 78% -8%, rgba(129, 140, 248, 0.12), transparent 60%),
+      radial-gradient(900px 600px at 6% 108%, rgba(34, 211, 238, 0.1), transparent 60%),
+      var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: rgba(34, 211, 238, 0.3);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+  /* Frosted card surface used across layouts/blocks */
+  .surface-card {
+    background: linear-gradient(180deg, rgba(24, 32, 58, 0.72), rgba(17, 24, 41, 0.72));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(8px);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Accessibility: respect reduced motion globally as a safety net.
+   (Components also branch on the useReducedMotion hook.) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
