@@ -1,0 +1,143 @@
+<!doctype html>
+<!--
+  Source template for public/og-image.png (1200×630 social preview card).
+  Regenerate with:  npm run og   (see scripts/gen-og.sh)
+  Keep this in sync with the deck's cover slide (src/data/slides.ts).
+-->
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1200px; height: 630px; }
+      body {
+        font-family: 'Sora', 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+        background: #0a0e1a;
+        color: #f8fafc;
+        position: relative;
+        overflow: hidden;
+      }
+      /* ambient glows — cyan (spatial) + violet (frequency) */
+      .glow {
+        position: absolute;
+        border-radius: 9999px;
+        filter: blur(90px);
+        opacity: 0.55;
+      }
+      .glow-cyan   { width: 620px; height: 620px; top: -260px; left: -180px; background: #22d3ee; }
+      .glow-violet { width: 620px; height: 620px; bottom: -300px; right: -160px; background: #7c3aed; }
+      .grid {
+        position: absolute; inset: 0;
+        background-image:
+          linear-gradient(to right, rgba(148,163,184,0.07) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(148,163,184,0.07) 1px, transparent 1px);
+        background-size: 48px 48px;
+        mask-image: radial-gradient(ellipse at center, #000 45%, transparent 85%);
+      }
+      .frame {
+        position: absolute; inset: 26px;
+        border: 1.5px solid rgba(148,163,184,0.18);
+        border-radius: 28px;
+      }
+      .card {
+        position: relative;
+        height: 100%;
+        padding: 72px 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      /* ---- header ---- */
+      .kicker { display: flex; align-items: center; gap: 18px; }
+      .mark {
+        width: 56px; height: 56px; border-radius: 14px;
+        background: #0a0e1a;
+        border: 1.5px solid rgba(34,211,238,0.5);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+      }
+      .kicker-text {
+        font-size: 20px; font-weight: 600; letter-spacing: 0.32em;
+        text-transform: uppercase;
+        background: linear-gradient(90deg, #22d3ee, #a78bfa);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      /* ---- body ---- */
+      .title {
+        font-size: 62px; font-weight: 700; line-height: 1.08;
+        letter-spacing: -0.02em;
+        max-width: 1000px;
+      }
+      .title .grad {
+        background: linear-gradient(100deg, #67e8f9 0%, #a78bfa 60%, #818cf8 100%);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      .divider {
+        width: 130px; height: 5px; border-radius: 9999px; margin: 30px 0 26px;
+        background: linear-gradient(90deg, #22d3ee, #a78bfa);
+      }
+      .subtitle {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 25px; line-height: 1.45; font-weight: 400;
+        color: #cbd5e1; max-width: 940px;
+      }
+      /* ---- footer ---- */
+      .footer {
+        display: flex; align-items: flex-end; justify-content: space-between;
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+      .authors { display: flex; gap: 14px; flex-wrap: wrap; }
+      .author {
+        font-size: 21px; font-weight: 600; color: #e2e8f0;
+        padding: 9px 18px; border-radius: 9999px;
+        background: rgba(148,163,184,0.08);
+        border: 1px solid rgba(148,163,184,0.16);
+      }
+      .affil { text-align: right; }
+      .affil .uni { font-size: 22px; font-weight: 600; color: #f1f5f9; }
+      .affil .sub { font-size: 19px; color: #94a3b8; margin-top: 6px; }
+    </style>
+  </head>
+  <body>
+    <div class="glow glow-cyan"></div>
+    <div class="glow glow-violet"></div>
+    <div class="grid"></div>
+    <div class="frame"></div>
+
+    <div class="card">
+      <div class="kicker">
+        <div class="mark">
+          <svg viewBox="0 0 64 64" width="40" height="40">
+            <path d="M14 40 q6 -16 12 0 t12 0 t12 0" fill="none" stroke="#a78bfa" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="22" cy="24" r="3.6" fill="#22d3ee"/>
+            <circle cx="32" cy="24" r="3.6" fill="#22d3ee"/>
+            <circle cx="42" cy="24" r="3.6" fill="#818cf8"/>
+          </svg>
+        </div>
+        <span class="kicker-text">Sidang Skripsi · 2026</span>
+      </div>
+
+      <div>
+        <div class="title">
+          Deteksi Deepfake: <span class="grad">Hybrid XceptionNet–FFT</span> vs Model Domain Tunggal
+        </div>
+        <div class="divider"></div>
+        <div class="subtitle">
+          Studi komparatif kinerja deteksi deepfake berbasis arsitektur hybrid yang menggabungkan ciri spasial &amp; frekuensi terhadap model domain tunggal.
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="authors">
+          <span class="author">Naomi Prisella</span>
+          <span class="author">Giovanny Halimko</span>
+          <span class="author">Samuel Onasis</span>
+        </div>
+        <div class="affil">
+          <div class="uni">Universitas Mikroskil</div>
+          <div class="sub">S-1 Teknik Informatika · Medan</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
