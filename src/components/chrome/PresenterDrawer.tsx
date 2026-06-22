@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useNav } from '@/context/NavContext'
 import { useSync } from '@/context/SyncContext'
@@ -59,6 +59,13 @@ export function PresenterDrawer() {
   const prev = index > 0 ? slides[index - 1] : null
   const next = index < total - 1 ? slides[index + 1] : null
 
+  // Whenever the slide changes (including a remote-driven move), jump the notes
+  // back to the top — otherwise the prior slide's scroll position lingers.
+  const scriptRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    if (scriptRef.current) scriptRef.current.scrollTop = 0
+  }, [slide.id])
+
   return (
     <AnimatePresence>
       {notesOpen && (
@@ -117,7 +124,10 @@ export function PresenterDrawer() {
 
           {/* Script — editable live for the controller, read-only mirror for
               everyone else. */}
-          <div className="no-scrollbar max-h-[26dvh] overflow-y-auto px-4 py-3">
+          <div
+            ref={scriptRef}
+            className="no-scrollbar max-h-[26dvh] overflow-y-auto px-4 py-3"
+          >
             {canEditNotes && editing ? (
               <textarea
                 value={note}
