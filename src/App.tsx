@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { NavProvider, useNav } from '@/context/NavContext'
+import { SyncProvider } from '@/context/SyncContext'
 import { useKeyboardNav } from '@/hooks/useKeyboardNav'
 import { useSwipe } from '@/hooks/useSwipe'
 import { useWheelNav } from '@/hooks/useWheelNav'
+import { useWakeLock } from '@/hooks/useWakeLock'
 import { renderSlide } from '@/data/slidesConfig'
 import { SlideTransition } from '@/components/layouts'
 import { Lightbox } from '@/components/blocks'
@@ -15,6 +17,9 @@ import { ProgressBar } from '@/components/chrome/ProgressBar'
 import { OverviewGrid } from '@/components/chrome/OverviewGrid'
 import { PresenterDrawer } from '@/components/chrome/PresenterDrawer'
 import { NavButtons } from '@/components/chrome/NavButtons'
+import { ControlRequestToast } from '@/components/chrome/ControlRequestToast'
+import { FollowAgainButton } from '@/components/chrome/FollowAgainButton'
+import { JoinPrompt } from '@/components/chrome/JoinPrompt'
 
 /** The animated slide stage: swipe + wheel gestures, directional transitions.
  *  Wheel nav is disabled while a scrollable panel owns the wheel. With
@@ -59,6 +64,11 @@ function DeckShell() {
       <MobileSidebar />
       <OverviewGrid />
       <PresenterDrawer />
+
+      {/* Realtime session chrome (inert when Supabase isn't configured) */}
+      <JoinPrompt />
+      <ControlRequestToast />
+      <FollowAgainButton />
     </div>
   )
 }
@@ -140,6 +150,7 @@ function GlobalLightbox() {
 
 function Root() {
   const { isPresent } = useNav()
+  useWakeLock() // keep the screen awake while the deck is open (both views)
   return (
     <>
       {isPresent ? <PresentShell /> : <DeckShell />}
@@ -151,7 +162,9 @@ function Root() {
 export default function App() {
   return (
     <NavProvider>
-      <Root />
+      <SyncProvider>
+        <Root />
+      </SyncProvider>
     </NavProvider>
   )
 }

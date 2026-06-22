@@ -79,7 +79,14 @@ export function NavProvider({ children }: { children: ReactNode }) {
     channelRef.current?.postMessage({ type: 'lightbox', payload: null })
   }, [])
 
-  const go = useCallback(
+  // Tracks whether the latest navigation came from a user gesture (`go`) or was
+  // programmatic / sync-driven (`goRemote`). The realtime layer reads this to
+  // decide whether a follower's slide change should detach it from the
+  // presenter — far more robust than inferring intent from the index value
+  // (which broke under rapid moves, where applies overwrite each other).
+  const lastNavRemoteRef = useRef(true)
+
+  const applyGo = useCallback(
     (i: number) => {
       setIndex((cur) => {
         const target = clampIndex(i, total)
@@ -90,6 +97,24 @@ export function NavProvider({ children }: { children: ReactNode }) {
     },
     [total],
   )
+
+  const go = useCallback(
+    (i: number) => {
+      lastNavRemoteRef.current = false // user gesture
+      applyGo(i)
+    },
+    [applyGo],
+  )
+
+  const goRemote = useCallback(
+    (i: number) => {
+      lastNavRemoteRef.current = true // sync/remote-driven
+      applyGo(i)
+    },
+    [applyGo],
+  )
+
+  const isLastNavRemote = useCallback(() => lastNavRemoteRef.current, [])
 
   const goToId = useCallback(
     (id: string) => {
@@ -142,7 +167,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
 
       if (data.type === 'goto' && typeof data.index === 'number') {
         remoteIndexRef.current = data.index
-        go(data.index)
+        goRemote(data.index)
       } else if (data.type === 'lightbox') {
         setLightbox(data.payload ?? null)
       } else if (data.type === 'scroll' && typeof data.f === 'number') {
@@ -160,7 +185,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
       bc.close()
       channelRef.current = null
     }
-  }, [go])
+  }, [goRemote])
 
   // Broadcast local slide scrolling so the present (projector) window mirrors
   // it. Scroll events don't bubble → listen in the capture phase. Throttled to
@@ -231,6 +256,8 @@ export function NavProvider({ children }: { children: ReactNode }) {
       total,
       direction,
       go,
+      goRemote,
+      isLastNavRemote,
       goToId,
       next,
       prev,
@@ -253,6 +280,8 @@ export function NavProvider({ children }: { children: ReactNode }) {
       total,
       direction,
       go,
+      goRemote,
+      isLastNavRemote,
       goToId,
       next,
       prev,

@@ -301,6 +301,12 @@ export interface NavState {
   /** +1 forward, -1 backward — drives directional transitions. */
   direction: number
   go: (i: number) => void
+  /** Programmatic navigation (sync/remote-driven). Unlike `go`, it does NOT
+   *  count as a manual move, so it never detaches a following follower. */
+  goRemote: (i: number) => void
+  /** Whether the most recent navigation was programmatic (`goRemote`) rather
+   *  than a user gesture (`go`/`next`/`prev`). Read by the realtime layer. */
+  isLastNavRemote: () => boolean
   goToId: (id: string) => void
   next: () => void
   prev: () => void

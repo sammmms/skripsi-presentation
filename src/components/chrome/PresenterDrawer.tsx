@@ -1,6 +1,9 @@
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useNav } from '@/context/NavContext'
+import { useSync } from '@/context/SyncContext'
 import { SECTION_BY_ID } from '@/data/sections'
+import { RichText } from '@/components/blocks/RichText'
 import { Icon } from '@/lib/icon'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
@@ -8,14 +11,51 @@ function num(n: number): string {
   return String(n).padStart(2, '0')
 }
 
+/** Renders presenter notes as light rich text: blank-line-separated paragraphs,
+ *  `- ` bullet lists, and inline **bold** / *italic* / `code` via RichText.
+ *  Single newlines inside a paragraph are preserved (whitespace-pre-line). */
+function NoteBody({ text }: { text: string }) {
+  const blocks = text.trim().split(/\n{2,}/)
+  return (
+    <div className="space-y-2.5 text-pretty text-sm leading-relaxed text-ink-soft">
+      {blocks.map((block, i) => {
+        const lines = block.split('\n')
+        const isList = lines.every((l) => /^\s*-\s+/.test(l))
+        if (isList) {
+          return (
+            <ul key={i} className="ml-1 space-y-1">
+              {lines.map((l, j) => (
+                <li key={j} className="flex gap-2">
+                  <span className="select-none text-faint">•</span>
+                  <RichText text={l.replace(/^\s*-\s+/, '')} />
+                </li>
+              ))}
+            </ul>
+          )
+        }
+        return (
+          <p key={i} className="whitespace-pre-line">
+            <RichText text={block} />
+          </p>
+        )
+      })}
+    </div>
+  )
+}
+
 /** Bottom drawer (toggle: `notesOpen`, hotkey 'n') with the current slide's
  *  speaker script and prev/next title previews. Audience never sees it unless
  *  toggled. Does not block slide navigation (keyboard/swipe still work). */
 export function PresenterDrawer() {
   const { slides, index, slide, total, notesOpen, toggleNotes } = useNav()
+  const { canEditNotes, getNote, setNote, notesStatus } = useSync()
   const reduce = useReducedMotion()
+  // Controllers default to the rendered (rich-text) view while presenting and
+  // flip to a raw-markdown textarea only when they tap "Edit".
+  const [editing, setEditing] = useState(false)
 
   const section = SECTION_BY_ID[slide.sectionId]
+  const note = getNote(slide.id)
   const prev = index > 0 ? slides[index - 1] : null
   const next = index < total - 1 ? slides[index + 1] : null
 
@@ -45,23 +85,49 @@ export function PresenterDrawer() {
               <span className="font-mono text-[0.65rem] tabular-nums text-faint">
                 {num(slide.index)} / {num(total)}
               </span>
+              {canEditNotes && notesStatus !== 'idle' && (
+                <span className="font-mono text-[0.6rem] tabular-nums text-faint">
+                  {notesStatus === 'saving' ? 'menyimpan…' : 'tersimpan ✓'}
+                </span>
+              )}
             </div>
-            <button
-              type="button"
-              onClick={toggleNotes}
-              aria-label="Tutup catatan"
-              className="flex size-9 items-center justify-center rounded-lg text-muted hover:bg-surface-2 hover:text-ink"
-            >
-              <Icon name="X" className="size-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              {canEditNotes && (
+                <button
+                  type="button"
+                  onClick={() => setEditing((v) => !v)}
+                  aria-label={editing ? 'Pratinjau catatan' : 'Edit catatan'}
+                  aria-pressed={editing}
+                  title={editing ? 'Pratinjau (rich text)' : 'Edit markdown'}
+                  className="flex size-9 items-center justify-center rounded-lg text-muted hover:bg-surface-2 hover:text-ink"
+                >
+                  <Icon name={editing ? 'Eye' : 'Pencil'} className="size-4" />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={toggleNotes}
+                aria-label="Tutup catatan"
+                className="flex size-9 items-center justify-center rounded-lg text-muted hover:bg-surface-2 hover:text-ink"
+              >
+                <Icon name="X" className="size-4" />
+              </button>
+            </div>
           </div>
 
-          {/* Script */}
+          {/* Script — editable live for the controller, read-only mirror for
+              everyone else. */}
           <div className="no-scrollbar max-h-[26dvh] overflow-y-auto px-4 py-3">
-            {slide.notes ? (
-              <p className="text-pretty text-sm leading-relaxed text-ink-soft">
-                {slide.notes}
-              </p>
+            {canEditNotes && editing ? (
+              <textarea
+                value={note}
+                onChange={(e) => setNote(slide.id, e.target.value)}
+                placeholder="Tulis catatan presenter untuk slide ini… (mendukung **tebal**, *miring*, `kode`, dan daftar dengan - )"
+                spellCheck={false}
+                className="no-scrollbar h-[20dvh] min-h-24 w-full resize-none bg-transparent text-pretty text-sm leading-relaxed text-ink-soft outline-none placeholder:text-faint"
+              />
+            ) : note ? (
+              <NoteBody text={note} />
             ) : (
               <p className="text-sm italic text-faint">
                 Tidak ada catatan untuk slide ini.

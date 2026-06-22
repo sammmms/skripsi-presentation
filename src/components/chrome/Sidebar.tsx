@@ -1,6 +1,7 @@
 import { useNav } from '@/context/NavContext'
 import { SECTIONS, SECTION_BY_ID } from '@/data/sections'
 import { Icon } from '@/lib/icon'
+import { ControlBar } from '@/components/chrome/ControlBar'
 import type { Slide } from '@/types/slide'
 
 /** Two-digit slide number from a 1-based index. */
@@ -86,8 +87,9 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Present launcher ------------------------------------------------- */}
-      <div className="shrink-0 border-t border-border p-3">
+      {/* Session + present launcher --------------------------------------- */}
+      <div className="shrink-0 space-y-2 border-t border-border p-3">
+        <ControlBar variant="sidebar" />
         <button
           type="button"
           onClick={openPresent}

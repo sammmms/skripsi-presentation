@@ -1,6 +1,7 @@
 import { useNav } from '@/context/NavContext'
 import { SECTION_BY_ID } from '@/data/sections'
 import { Icon } from '@/lib/icon'
+import { ControlBar } from '@/components/chrome/ControlBar'
 
 function num(n: number): string {
   return String(n).padStart(2, '0')
@@ -26,7 +27,7 @@ export function TopBar() {
 
   return (
     <header
-      className="flex shrink-0 items-center gap-2 border-b border-border bg-surface/70 px-2 backdrop-blur-md lg:hidden"
+      className="relative z-30 flex shrink-0 items-center gap-2 border-b border-border bg-surface/70 px-2 backdrop-blur-md lg:hidden"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <button
@@ -58,6 +59,7 @@ export function TopBar() {
       </div>
 
       <div className="flex shrink-0 items-center">
+        <ControlBar variant="topbar" />
         <button
           type="button"
           onClick={openPresent}
