@@ -514,7 +514,7 @@ Dan satu hal yang ingin saya tekankan — ini akan relevan nanti di pembahasan: 
         name: 'Spatial',
         tagline: 'Hanya cabang spasial',
         tone: 'spatial',
-        params: '~22 jt',
+        params: '~22,8 jt',
         points: ['RGB → XceptionNet → logit'],
         metric: { value: '0,971', label: 'AUC in-dataset (CDF)' },
       },
@@ -522,7 +522,7 @@ Dan satu hal yang ingin saya tekankan — ini akan relevan nanti di pembahasan: 
         name: 'Freq',
         tagline: 'Hanya cabang frekuensi',
         tone: 'frequency',
-        params: '~4 jt',
+        params: '~4,2 jt',
         points: ['Peta FFT → FreqCNN (5 blok residual) → logit'],
         metric: { value: '≈0,56', label: 'AUC ≈ acak' },
       },
@@ -541,9 +541,9 @@ Dan satu hal yang ingin saya tekankan — ini akan relevan nanti di pembahasan: 
 
 Ini **arsitektur** dari ketiga model yang kami bandingkan. *[tunjuk diagram dua cabang]*
 
-Model pertama, **Spatial**. Murni cabang spasial: citra RGB masuk ke **XceptionNet**, langsung menghasilkan logit. Sekitar **22 juta** parameter.
+Model pertama, **Spatial**. Murni cabang spasial: citra RGB masuk ke **XceptionNet**, langsung menghasilkan logit. Sekitar **22,8 juta** parameter.
 
-Model kedua, **Freq**. Murni cabang frekuensi: peta FFT masuk ke **FreqCNN** — sebuah CNN dengan lima blok residual — menghasilkan logit. Jauh lebih ringan, sekitar **4 juta** parameter.
+Model kedua, **Freq**. Murni cabang frekuensi: peta FFT masuk ke **FreqCNN** — sebuah CNN dengan lima blok residual — menghasilkan logit. Jauh lebih ringan, sekitar **4,2 juta** parameter.
 
 Model ketiga, **Hybrid**. Ini menggabungkan keduanya dengan **late fusion**. Fitur dari XceptionNet diproyeksikan ke 256 dimensi, fitur dari FreqCNN juga 256 dimensi; keduanya **digabung menjadi 512 dimensi**, melewati **SE gate** untuk pembobotan, lalu masuk ke klasifikasi.
 

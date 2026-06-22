@@ -3,8 +3,9 @@ import type { FigureSpec } from '@/types/slide'
 /* Curated thesis figures copied into /public/figures with stable names.
    NOTE: thesis figure numbers do not map 1:1 to the source PNG filenames;
    `figureNo` below reflects the number used in the defense script/slide, while
-   the `src` points at the curated asset. Confusion-matrix and training-curve
-   figures (Gambar 4.9 / 4.10) are not finalised yet → use placeholder specs. */
+   the `src` points at the curated asset. All figures are the final 2026-06-20
+   thesis renders (skripsi/documents/media_v2), incl. the now-finalised
+   confusion-matrix (4.9) and training-curve (4.10). */
 export const FIGURES = {
   frameRealFake: {
     src: '/figures/fig-frame-real-fake.png',
@@ -98,20 +99,18 @@ export const FIGURES = {
     figureNo: 'Gambar 4.2',
   },
 
-  /* Not finalised yet — render as labelled placeholders. */
+  /* Final 2026-06-20 thesis renders. */
   confusionMatrix: {
     src: '/figures/fig-confusion-matrix.png',
-    alt: 'Confusion matrix in-dataset vs cross-dataset',
-    caption: 'Confusion matrix in-dataset vs cross-dataset (n = 750).',
+    alt: 'Confusion matrix model spasial in-dataset (CDF) vs cross-dataset (CDF→FFPP)',
+    caption: 'Confusion matrix spasial: in-dataset (CDF) vs cross-dataset (CDF→FFPP) — keruntuhan recall.',
     figureNo: 'Gambar 4.9',
-    placeholder: true,
   },
   trainingCurve: {
     src: '/figures/fig-training-curve.png',
-    alt: 'Kurva dinamika pelatihan model frekuensi vs spasial',
-    caption: 'Kurva AUC validasi: frekuensi stagnan, spasial konvergen.',
+    alt: 'Kurva dinamika pelatihan FreqCNN vs XceptionNet pada FaceForensics++',
+    caption: 'Kurva pelatihan FreqCNN vs XceptionNet (FFPP, n=750): freq stagnan, spasial konvergen.',
     figureNo: 'Gambar 4.10',
-    placeholder: true,
   },
 } satisfies Record<string, FigureSpec>
 
