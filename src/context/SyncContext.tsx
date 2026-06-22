@@ -15,18 +15,25 @@ import { useNav } from '@/context/NavContext'
 import { SLIDES } from '@/data/slides'
 
 /* ============================================================================
-   Cross-device realtime layer (Supabase) layered on top of NavContext.
+   Cross-device realtime layer (Supabase), built entirely on BROADCAST.
 
-   - Presence  → the list of joined devices (name + role + current slide).
-   - Broadcast → live nav events ('nav') + the control hand-off protocol
-     ('control') + instant note keystrokes ('notes').
-   - Postgres  → the `deck_notes` table persists notes + streams changes so late
-     joiners and reloads see the latest text.
+   Supabase *Presence* proved unreliable on this project (it returns an empty
+   state even after track()), so NOTHING here depends on it. Instead:
 
-   Followers auto-apply the controller's slide/scroll/lightbox while `following`.
-   Navigating manually detaches them (following=false) until they tap "Ikuti
-   lagi". When Supabase isn't configured (or in the local present window) the
-   whole layer is inert and the deck behaves exactly as before.
+   - Roster   → each device periodically announces {clientId,name,role,index}
+                over a 'roster' broadcast; everyone keeps a local peer map with
+                last-seen timestamps and prunes the stale. This is the source of
+                the participant list, the controller's slide (follow backstop),
+                and late-join controller discovery.
+   - Control  → 'control' broadcasts (took/grant/deny/released) are the
+                authoritative source of who holds control.
+   - Nav      → 'nav' broadcasts (goto/scroll/lightbox) drive live following.
+   - Notes    → 'notes' broadcast (instant) + the deck_notes table (persist).
+
+   Follow model: a following follower is LOCKED (NavContext.setNavLock) so its
+   own swipes/taps can't break sync; it browses only by tapping "Jelajah
+   sendiri" (unfollow) and re-syncs with "Ikuti lagi". No fragile remote-vs-
+   manual inference anywhere.
    ========================================================================== */
 
 type Role = 'controller' | 'follower'
@@ -43,6 +50,10 @@ export interface Peer extends TrackMeta {
   self: boolean
 }
 
+interface RosterEntry extends TrackMeta {
+  lastSeen: number
+}
+
 interface PendingRequest {
   fromId: string
   fromName: string
@@ -50,37 +61,36 @@ interface PendingRequest {
 
 type NotesStatus = 'idle' | 'saving' | 'saved'
 
+const HEARTBEAT_MS = 3000
+const PEER_TTL_MS = 10000
+
 export interface SyncState {
   enabled: boolean
   clientId: string
-  /** This device's display name. */
   name: string
   setName: (name: string) => void
-  /** Realtime is on but the user hasn't chosen a name yet → show the prompt. */
   needsName: boolean
 
   peers: Peer[]
   role: Role
   isController: boolean
-  /** The peer currently holding control (may be this device). */
   controller: Peer | null
 
   following: boolean
   followAgain: () => void
+  /** Detach from the presenter to browse freely (un-lock). */
+  unfollow: () => void
 
   requestControl: () => void
   releaseControl: () => void
-  /** Incoming hand-off request shown to the current controller. */
   pendingRequest: PendingRequest | null
   approveRequest: () => void
   denyRequest: () => void
-  /** True while this device waits for its own control request to be answered. */
   outgoingRequest: boolean
 
   notice: string | null
   dismissNotice: () => void
 
-  /** Effective note text for a slide (live override → baked default). */
   getNote: (slideId: string) => string
   setNote: (slideId: string, content: string) => void
   canEditNotes: boolean
@@ -98,18 +108,13 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   const nav = useNav()
   const clientId = useMemo(getClientId, [])
 
-  // The present (projector) window stays purely local (BroadcastChannel) — it
-  // must not join the room as a ghost peer.
+  // The present (projector) window stays purely local (BroadcastChannel).
   const enabled = REALTIME_ENABLED && !nav.isPresent
 
   const [name, setNameState] = useState<string>(() => getStoredName() ?? '')
-  const [peers, setPeers] = useState<Peer[]>([])
+  const [otherPeers, setOtherPeers] = useState<Peer[]>([])
   const [role, setRole] = useState<Role>('follower')
   const [following, setFollowing] = useState(true)
-  // Who currently holds control, learned from the (reliable) 'control'
-  // broadcasts — NOT from presence, which is coalesced and can briefly drop a
-  // peer. Used for display + the follow backstop; the live follow path doesn't
-  // depend on it at all.
   const [controllerId, setControllerId] = useState<string | null>(null)
   const [pendingRequest, setPendingRequest] = useState<PendingRequest | null>(null)
   const [outgoingRequest, setOutgoingRequest] = useState(false)
@@ -117,17 +122,16 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   const [notesMap, setNotesMap] = useState<Record<string, string>>({})
   const [notesStatus, setNotesStatus] = useState<NotesStatus>('idle')
 
-  // --- Latest-value refs so the once-subscribed channel handlers never read
-  //     stale closures. ---------------------------------------------------
+  // --- Latest-value refs for the once-subscribed channel handlers. ---------
   const channelRef = useRef<RealtimeChannel | null>(null)
   const subscribedRef = useRef(false)
   const roleRef = useRef(role)
   const followingRef = useRef(following)
   const nameRef = useRef(name)
   const navRef = useRef(nav)
-  // Throttle controller scroll broadcasts so they never trip the realtime rate
-  // limit (which would silently drop subsequent slide changes too).
   const lastScrollSentRef = useRef(0)
+  // Broadcast-based roster: other devices only (self is merged in at render).
+  const rosterRef = useRef<Map<string, RosterEntry>>(new Map())
 
   roleRef.current = role
   followingRef.current = following
@@ -139,25 +143,36 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     window.setTimeout(() => setNotice((cur) => (cur === msg ? null : cur)), 4000)
   }, [])
 
-  /** Push this device's current state into Presence. */
-  const trackPresence = useCallback(() => {
-    const ch = channelRef.current
-    if (!ch || !subscribedRef.current) return
-    void ch.track({
+  const send = useCallback((event: string, payload: Record<string, unknown>) => {
+    void channelRef.current?.send({ type: 'broadcast', event, payload })
+  }, [])
+
+  /** Re-publish the `otherPeers` state from the roster map. */
+  const flushPeers = useCallback(() => {
+    setOtherPeers(
+      Array.from(rosterRef.current.values()).map((p) => ({
+        clientId: p.clientId,
+        name: p.name,
+        role: p.role,
+        index: p.index,
+        self: false,
+      })),
+    )
+  }, [])
+
+  /** Announce this device to everyone (roster heartbeat / change ping). */
+  const announce = useCallback(() => {
+    if (!subscribedRef.current) return
+    send('roster', {
       clientId,
       name: nameRef.current || `Tamu ${clientId.slice(0, 3)}`,
       role: roleRef.current,
       index: navRef.current.index,
     } satisfies TrackMeta)
-  }, [clientId])
+  }, [clientId, send])
 
-  /** Fire-and-forget broadcast helper. */
-  const send = useCallback((event: string, payload: Record<string, unknown>) => {
-    void channelRef.current?.send({ type: 'broadcast', event, payload })
-  }, [])
-
-  /** Apply a controller-driven slide change. `goRemote` tags it as programmatic
-   *  so the detach logic never mistakes it for a manual move. */
+  /** Apply a controller-driven slide change. `goRemote` bypasses the follow
+   *  lock and never counts as a manual move. */
   const applyRemoteGoto = useCallback((index: number) => {
     navRef.current.goRemote(index)
   }, [])
@@ -167,33 +182,33 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     if (!enabled || !supabase) return
     const sb = supabase
 
-    const channel = sb.channel(ROOM, {
-      config: { presence: { key: clientId }, broadcast: { self: false } },
-    })
+    const channel = sb.channel(ROOM, { config: { broadcast: { self: false } } })
     channelRef.current = channel
 
-    channel.on('presence', { event: 'sync' }, () => {
-      const state = channel.presenceState<TrackMeta>()
-      const list: Peer[] = []
-      for (const key of Object.keys(state)) {
-        const metas = state[key]
-        const m = metas[metas.length - 1]
-        if (m) list.push({ ...m, self: m.clientId === clientId })
-      }
-      // Controller first, then by name, for a stable list.
-      list.sort((a, b) =>
-        a.role === b.role ? a.name.localeCompare(b.name) : a.role === 'controller' ? -1 : 1,
-      )
-      setPeers(list)
+    channel.on('broadcast', { event: 'roster' }, ({ payload }) => {
+      const d = payload as Partial<TrackMeta>
+      if (!d.clientId || d.clientId === clientId) return
+      const isNew = !rosterRef.current.has(d.clientId)
+      rosterRef.current.set(d.clientId, {
+        clientId: d.clientId,
+        name: d.name || 'Tamu',
+        role: d.role || 'follower',
+        index: d.index ?? 0,
+        lastSeen: Date.now(),
+      })
+      flushPeers()
+      if (isNew) announce() // help the newcomer learn us immediately
+    })
+
+    channel.on('broadcast', { event: 'bye' }, ({ payload }) => {
+      const d = payload as { clientId?: string }
+      if (d.clientId && rosterRef.current.delete(d.clientId)) flushPeers()
     })
 
     channel.on('broadcast', { event: 'nav' }, ({ payload }) => {
       const d = payload as { type?: string; from?: string; index?: number; payload?: unknown; f?: number }
-      // Only a controller emits 'nav', and self-broadcasts are off — so any
-      // 'nav' a following follower receives is from the controller. We do NOT
-      // gate on a presence-derived controller id: presence is coalesced and can
-      // briefly drop the controller's entry, which used to make followers
-      // silently reject every update while still believing they were following.
+      // Only a controller emits 'nav' and self-broadcast is off, so any 'nav' a
+      // following follower receives is from the controller.
       if (roleRef.current === 'controller' || !followingRef.current) return
       if (!d.from || d.from === clientId) return
 
@@ -219,19 +234,17 @@ export function SyncProvider({ children }: { children: ReactNode }) {
           }
           break
         case 'took':
-          // Someone grabbed free control — everyone records the new controller.
           if (d.from) setControllerId(d.from)
           setOutgoingRequest(false)
           break
         case 'grant':
-          // Control handed to d.to — everyone records it; the grantee promotes.
           if (d.to) setControllerId(d.to)
           if (d.to === clientId) {
             setRole('controller')
             setFollowing(false)
             setOutgoingRequest(false)
             roleRef.current = 'controller'
-            trackPresence()
+            announce()
             showNotice('Kontrol diberikan kepada Anda')
           }
           break
@@ -242,7 +255,6 @@ export function SyncProvider({ children }: { children: ReactNode }) {
           }
           break
         case 'released':
-          // Controller stepped down — clear if it was them.
           setControllerId((cur) => (cur === d.from ? null : cur))
           setOutgoingRequest(false)
           break
@@ -261,18 +273,45 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     void channel.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
         subscribedRef.current = true
-        trackPresence()
+        announce()
       }
     })
 
     return () => {
       subscribedRef.current = false
       channelRef.current = null
+      void channel.send({ type: 'broadcast', event: 'bye', payload: { clientId } })
       void sb.removeChannel(channel)
     }
-  }, [enabled, clientId, applyRemoteGoto, trackPresence, showNotice])
+  }, [enabled, clientId, applyRemoteGoto, announce, flushPeers, showNotice])
 
-  // --- Load existing notes once (independent of channel subscribe). --------
+  // --- Roster heartbeat + prune stale peers. -------------------------------
+  useEffect(() => {
+    if (!enabled) return
+    const iv = window.setInterval(() => {
+      announce()
+      const now = Date.now()
+      let changed = false
+      for (const [id, p] of rosterRef.current) {
+        if (now - p.lastSeen > PEER_TTL_MS) {
+          rosterRef.current.delete(id)
+          changed = true
+        }
+      }
+      if (changed) flushPeers()
+    }, HEARTBEAT_MS)
+    return () => window.clearInterval(iv)
+  }, [enabled, announce, flushPeers])
+
+  // Best-effort "leaving" so peers drop us promptly.
+  useEffect(() => {
+    if (!enabled) return
+    const bye = () => send('bye', { clientId })
+    window.addEventListener('pagehide', bye)
+    return () => window.removeEventListener('pagehide', bye)
+  }, [enabled, send, clientId])
+
+  // --- Load existing notes once. -------------------------------------------
   useEffect(() => {
     if (!enabled || !supabase) return
     let cancelled = false
@@ -292,8 +331,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     }
   }, [enabled])
 
-  // --- Stream note edits from the DB on a SEPARATE channel, so a missing
-  //     `deck_notes` table can't take down presence/control with it. --------
+  // --- Stream note edits from the DB on a SEPARATE channel. ----------------
   useEffect(() => {
     if (!enabled || !supabase) return
     const sb = supabase
@@ -315,65 +353,81 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     }
   }, [enabled])
 
-  // --- Controller identity. Authoritative source = the 'control' broadcasts
-  //     above; presence is only a late-join fallback. -----------------------
-  const presenceController = useMemo(
-    () => peers.find((p) => p.role === 'controller') ?? null,
-    [peers],
+  // --- Peer list = self (live) + others (from roster). ---------------------
+  const peers = useMemo<Peer[]>(() => {
+    const self: Peer = {
+      clientId,
+      name: name || `Tamu ${clientId.slice(0, 3)}`,
+      role,
+      index: nav.index,
+      self: true,
+    }
+    const list = [self, ...otherPeers]
+    list.sort((a, b) =>
+      a.role === b.role ? a.name.localeCompare(b.name) : a.role === 'controller' ? -1 : 1,
+    )
+    return list
+  }, [clientId, name, role, nav.index, otherPeers])
+
+  // --- Controller identity: from 'control' broadcasts; roster is the
+  //     late-join fallback. ---------------------------------------------------
+  const rosterController = useMemo(
+    () => otherPeers.find((p) => p.role === 'controller') ?? null,
+    [otherPeers],
   )
-
-  // Late join / recovery: if we don't yet know the controller but presence
-  // reveals one, adopt it (for display + the follow backstop).
   useEffect(() => {
-    if (controllerId == null && presenceController) setControllerId(presenceController.clientId)
-  }, [controllerId, presenceController])
+    if (controllerId == null && rosterController) setControllerId(rosterController.clientId)
+  }, [controllerId, rosterController])
 
-  // The controller as a present peer (for name display + its current slide).
   const controllerPeer = useMemo(
     () => peers.find((p) => p.clientId === controllerId) ?? null,
     [peers, controllerId],
   )
 
-  // Resolve the "two devices grabbed free control at once" race: higher id yields.
+  // Two-controllers race: higher clientId yields.
   useEffect(() => {
     if (role !== 'controller') return
-    const other = peers.find((p) => p.role === 'controller' && p.clientId !== clientId)
+    const other = otherPeers.find((p) => p.role === 'controller')
     if (other && other.clientId < clientId) {
       setRole('follower')
       setFollowing(true)
       roleRef.current = 'follower'
       setControllerId(other.clientId)
-      trackPresence()
+      announce()
     }
-  }, [peers, role, clientId, trackPresence])
+  }, [otherPeers, role, clientId, announce])
 
-  // The controller's current slide (from presence), for the follow backstop.
+  // Follow backstop: if a 'nav' goto is ever missed, the controller's roster
+  // index still pulls a following follower into sync.
   const controllerIndex =
     controllerPeer && controllerPeer.clientId !== clientId ? controllerPeer.index : null
-
-  // Follow backstop: if a 'nav' broadcast is ever missed, the controller's
-  // presence index still pulls a following follower into sync. Keyed on
-  // controllerIndex — NOT nav.index — so it never fights manual browsing, and it
-  // also fires when `following` flips back to true (e.g. "Ikuti lagi").
   useEffect(() => {
     if (!enabled || role !== 'follower' || !following) return
     if (controllerIndex == null) return
     if (controllerIndex !== navRef.current.index) applyRemoteGoto(controllerIndex)
   }, [controllerIndex, following, role, enabled, applyRemoteGoto])
 
-  // --- Broadcast local slide changes when controlling; keep presence index
-  //     current; detach a following follower that navigates MANUALLY. The
-  //     remote-vs-manual test is deterministic: a change to the exact index we
-  //     asked for is remote; anything else is the user moving. -------
+  // --- Broadcast slide changes when controlling; announce on every move. ---
   useEffect(() => {
     if (!enabled) return
     if (role === 'controller') {
       send('nav', { type: 'goto', from: clientId, index: nav.index })
-    } else if (following && role === 'follower' && !navRef.current.isLastNavRemote()) {
-      setFollowing(false) // a genuine user gesture moved us → detach
     }
-    trackPresence()
-  }, [nav.index, enabled, role, following, clientId, send, trackPresence])
+    announce()
+  }, [nav.index, enabled, role, clientId, send, announce])
+
+  // Lock self-navigation only while actually glued to a present controller, so
+  // accidental swipes/taps can't break sync. Before anyone takes control (no
+  // controllerId) the deck stays freely navigable for everyone.
+  const lockedToPresenter =
+    enabled &&
+    role === 'follower' &&
+    following &&
+    controllerId != null &&
+    controllerId !== clientId
+  useEffect(() => {
+    navRef.current.setNavLock(lockedToPresenter)
+  }, [lockedToPresenter])
 
   // Mirror the lightbox while controlling.
   useEffect(() => {
@@ -381,13 +435,12 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     send('nav', { type: 'lightbox', from: clientId, payload: nav.lightbox })
   }, [nav.lightbox, enabled, role, clientId, send])
 
-  // Re-advertise on name change.
+  // Re-announce on name change.
   useEffect(() => {
-    if (enabled) trackPresence()
-  }, [name, enabled, trackPresence])
+    if (enabled) announce()
+  }, [name, enabled, announce])
 
-  // Broadcast slide scrolling while controlling — coalesced to a frame AND
-  // capped at ~12/s so it can never trip the realtime rate limit.
+  // Broadcast slide scrolling while controlling — coalesced + capped at ~12/s.
   useEffect(() => {
     if (!enabled) return
     let raf = 0
@@ -424,14 +477,13 @@ export function SyncProvider({ children }: { children: ReactNode }) {
 
   const requestControl = useCallback(() => {
     if (role === 'controller') return
-    // Free (or unknown / stale) → take it; otherwise ask the current holder.
     const heldByOther = controllerId != null && controllerId !== clientId
     if (!heldByOther) {
       setRole('controller')
       setFollowing(false)
       roleRef.current = 'controller'
       setControllerId(clientId)
-      trackPresence()
+      announce()
       send('control', { kind: 'took', from: clientId })
     } else {
       send('control', {
@@ -442,7 +494,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       })
       setOutgoingRequest(true)
     }
-  }, [role, controllerId, clientId, send, trackPresence])
+  }, [role, controllerId, clientId, send, announce])
 
   const releaseControl = useCallback(() => {
     if (role !== 'controller') return
@@ -450,9 +502,9 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     setFollowing(true)
     roleRef.current = 'follower'
     setControllerId(null)
-    trackPresence()
+    announce()
     send('control', { kind: 'released', from: clientId })
-  }, [role, clientId, send, trackPresence])
+  }, [role, clientId, send, announce])
 
   const approveRequest = useCallback(() => {
     if (!pendingRequest) return
@@ -461,9 +513,9 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     setFollowing(true)
     roleRef.current = 'follower'
     setControllerId(pendingRequest.fromId)
-    trackPresence()
+    announce()
     setPendingRequest(null)
-  }, [pendingRequest, clientId, send, trackPresence])
+  }, [pendingRequest, clientId, send, announce])
 
   const denyRequest = useCallback(() => {
     if (!pendingRequest) return
@@ -477,6 +529,11 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     if (controllerPeer) applyRemoteGoto(controllerPeer.index)
   }, [controllerPeer, applyRemoteGoto])
 
+  const unfollow = useCallback(() => {
+    setFollowing(false)
+    followingRef.current = false
+  }, [])
+
   // --- Notes ---------------------------------------------------------------
   const getNote = useCallback(
     (slideId: string) => notesMap[slideId] ?? BAKED_NOTES[slideId] ?? '',
@@ -485,7 +542,6 @@ export function SyncProvider({ children }: { children: ReactNode }) {
 
   const saveTimer = useRef<number | undefined>(undefined)
   const pendingSave = useRef<{ id: string; content: string } | null>(null)
-
   const canEditNotes = enabled && role === 'controller'
 
   const setNote = useCallback(
@@ -527,6 +583,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       controller,
       following,
       followAgain,
+      unfollow,
       requestControl,
       releaseControl,
       pendingRequest,
@@ -550,6 +607,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       controller,
       following,
       followAgain,
+      unfollow,
       requestControl,
       releaseControl,
       pendingRequest,

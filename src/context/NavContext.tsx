@@ -79,12 +79,13 @@ export function NavProvider({ children }: { children: ReactNode }) {
     channelRef.current?.postMessage({ type: 'lightbox', payload: null })
   }, [])
 
-  // Tracks whether the latest navigation came from a user gesture (`go`) or was
-  // programmatic / sync-driven (`goRemote`). The realtime layer reads this to
-  // decide whether a follower's slide change should detach it from the
-  // presenter — far more robust than inferring intent from the index value
-  // (which broke under rapid moves, where applies overwrite each other).
-  const lastNavRemoteRef = useRef(true)
+  // When locked (a follower glued to the presenter), user-driven `go` is a
+  // no-op so accidental swipes/taps/buttons — trivially easy on a phone —
+  // cannot break sync. `goRemote` (sync-driven) always bypasses the lock.
+  const navLockRef = useRef(false)
+  const setNavLock = useCallback((locked: boolean) => {
+    navLockRef.current = locked
+  }, [])
 
   const applyGo = useCallback(
     (i: number) => {
@@ -100,21 +101,14 @@ export function NavProvider({ children }: { children: ReactNode }) {
 
   const go = useCallback(
     (i: number) => {
-      lastNavRemoteRef.current = false // user gesture
+      if (navLockRef.current) return // glued to presenter — ignore self-nav
       applyGo(i)
     },
     [applyGo],
   )
 
-  const goRemote = useCallback(
-    (i: number) => {
-      lastNavRemoteRef.current = true // sync/remote-driven
-      applyGo(i)
-    },
-    [applyGo],
-  )
-
-  const isLastNavRemote = useCallback(() => lastNavRemoteRef.current, [])
+  // Programmatic navigation (sync/remote-driven); always applies, lock or not.
+  const goRemote = useCallback((i: number) => applyGo(i), [applyGo])
 
   const goToId = useCallback(
     (id: string) => {
@@ -257,7 +251,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
       direction,
       go,
       goRemote,
-      isLastNavRemote,
+      setNavLock,
       goToId,
       next,
       prev,
@@ -281,7 +275,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
       direction,
       go,
       goRemote,
-      isLastNavRemote,
+      setNavLock,
       goToId,
       next,
       prev,

@@ -91,7 +91,17 @@ function SessionPanel({
   sync: ReturnType<typeof useSync>
   onAction: () => void
 }) {
-  const { peers, isController, outgoingRequest, requestControl, releaseControl } = sync
+  const {
+    peers,
+    isController,
+    controller,
+    following,
+    outgoingRequest,
+    requestControl,
+    releaseControl,
+    followAgain,
+    unfollow,
+  } = sync
 
   return (
     <div>
@@ -125,6 +135,22 @@ function SessionPanel({
           </li>
         ))}
       </ul>
+
+      {!isController && controller && (
+        <div className="mt-2 border-t border-border pt-2">
+          <button
+            type="button"
+            onClick={() => {
+              ;(following ? unfollow : followAgain)()
+              onAction()
+            }}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:border-border-strong hover:text-ink"
+          >
+            <Icon name={following ? 'Unlink' : 'Link'} className="size-4" />
+            {following ? 'Jelajah sendiri' : 'Ikuti presenter'}
+          </button>
+        </div>
+      )}
 
       <div className="mt-2 border-t border-border pt-2">
         {isController ? (

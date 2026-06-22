@@ -301,12 +301,13 @@ export interface NavState {
   /** +1 forward, -1 backward — drives directional transitions. */
   direction: number
   go: (i: number) => void
-  /** Programmatic navigation (sync/remote-driven). Unlike `go`, it does NOT
-   *  count as a manual move, so it never detaches a following follower. */
+  /** Programmatic navigation (sync/remote-driven). Always applies, even when
+   *  `setNavLock(true)` has frozen user-driven `go` for a glued follower. */
   goRemote: (i: number) => void
-  /** Whether the most recent navigation was programmatic (`goRemote`) rather
-   *  than a user gesture (`go`/`next`/`prev`). Read by the realtime layer. */
-  isLastNavRemote: () => boolean
+  /** Freeze (or release) user-driven `go`/`next`/`prev`. Used by the realtime
+   *  layer to lock a follower onto the presenter so accidental swipes/taps
+   *  can't break sync. `goRemote` bypasses the lock. */
+  setNavLock: (locked: boolean) => void
   goToId: (id: string) => void
   next: () => void
   prev: () => void
