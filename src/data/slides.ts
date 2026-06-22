@@ -420,7 +420,7 @@ Dari sini kita latih **tiga model** — spasial, frekuensi, dan hybrid — dan k
         {
           dataset: 'FaceForensics++ (FFPP)',
           metode: '4 metode',
-          catatan: '1.000 video (500 real / 500 fake), kompresi c23',
+          catatan: '750 video (375 real / 375 fake), kompresi c23',
         },
         {
           dataset: 'Celeb-DF v2 (CDF)',
@@ -442,15 +442,15 @@ Dari sini kita latih **tiga model** — spasial, frekuensi, dan hybrid — dan k
       },
     ],
     notes:
-      `**Cue:** Dua dataset ini memungkinkan kami menguji generalisasi pada generator dan kondisi rekaman berbeda (subset seimbang 375/375 untuk CDF, sesuai Tabel 3.1). · *±55 dtk*
+      `**Cue:** Dua dataset ini memungkinkan kami menguji generalisasi pada generator dan kondisi rekaman berbeda (kedua dataset memakai subset seimbang 375/375 = 750 video, sesuai Tabel 3.1). · *±55 dtk*
 
 Kami memakai **dua dataset benchmark**. *[tunjuk tabel]*
 
-Yang pertama, **FaceForensics++** — kami singkat FFPP. Berisi **seribu video**, lima ratus asli dan lima ratus palsu, dengan **empat metode manipulasi**, pada tingkat kompresi c23.
+Yang pertama, **FaceForensics++** — kami singkat FFPP. Kami pakai **subset seimbang 750 video**, 375 asli dan 375 palsu, dengan **empat metode manipulasi**, pada tingkat kompresi c23.
 
 Yang kedua, **Celeb-DF versi dua** — CDF. Berisi **750 video**, 375 asli dan 375 palsu, dengan satu metode manipulasi tetapi **kualitas yang tinggi**.
 
-Dua catatan penting. Pertama, kami sengaja memakai **subset yang seimbang** di tiap dataset, dan dibagi **per video** 70/15/15 tanpa kebocoran. *[Bila ditanya: Celeb-DF v2 versi publik sebenarnya tidak seimbang — 590 real dan 5.639 fake — tetapi kami ambil subset seimbang 375 / 375 sesuai Tabel 3.1, supaya perbandingannya adil dan tidak berat sebelah.]*
+Dua catatan penting. Pertama, kedua dataset kami pakai sebagai **subset seimbang 375 / 375 (750 video)**, dibagi **per video** 70/15/15 tanpa kebocoran. *[Bila ditanya: benchmark FFPP penuh jauh lebih besar (1.000 video asli + empat metode manipulasi) dan Celeb-DF v2 publik tidak seimbang (590 real / 5.639 fake) — tetapi kami sengaja mengambil subset seimbang 375 / 375 untuk tiap dataset, sesuai Tabel 3.1, supaya perbandingannya adil dan tidak berat sebelah.]*
 
 Kedua, kami melakukan **evaluasi cross-dataset**: model dilatih di satu dataset lalu diuji di dataset lain — **kedua arah**, FFPP ke CDF dan CDF ke FFPP. Inilah inti pengujian generalisasi kami.`,
   },
@@ -516,7 +516,7 @@ Dan satu hal yang ingin saya tekankan — ini akan relevan nanti di pembahasan: 
         tone: 'spatial',
         params: '~22 jt',
         points: ['RGB → XceptionNet → logit'],
-        metric: { value: '0,969', label: 'AUC in-dataset (CDF)' },
+        metric: { value: '0,971', label: 'AUC in-dataset (CDF)' },
       },
       {
         name: 'Freq',
@@ -524,7 +524,7 @@ Dan satu hal yang ingin saya tekankan — ini akan relevan nanti di pembahasan: 
         tone: 'frequency',
         params: '~4 jt',
         points: ['Peta FFT → FreqCNN (5 blok residual) → logit'],
-        metric: { value: '≈0,55', label: 'AUC ≈ acak' },
+        metric: { value: '≈0,56', label: 'AUC ≈ acak' },
       },
       {
         name: 'Hybrid',
@@ -571,7 +571,7 @@ Kuncinya: **ketiga model berbagi komponen yang sama**. Dengan begitu perbandinga
         icon: 'Settings2',
       },
       {
-        text: 'Backbone dibekukan 3 epoch awal lalu di-unfreeze; warmup 2 epoch + cosine decay.',
+        text: 'Backbone dibekukan 3 epoch awal lalu di-unfreeze; warmup 3 epoch + cosine decay.',
         icon: 'Snowflake',
       },
       {
@@ -588,7 +588,7 @@ Kuncinya: **ketiga model berbagi komponen yang sama**. Dengan begitu perbandinga
 
 Strategi pelatihan saya **lewati cepat** — ini lebih ke bukti rigor, dan saya siap merinci bila Bapak/Ibu penguji ingin. *[tunjuk kurva learning rate]*
 
-Singkatnya: loss **BCEWithLogitsLoss** dengan *label smoothing* nol koma nol lima. Optimizer **AdamW** dengan *learning rate* dua kali sepuluh pangkat minus empat, memakai *differential learning rate*. Backbone kami **bekukan tiga epoch pertama** lalu di-unfreeze, dengan *warmup* dua epoch dilanjutkan *cosine decay*.
+Singkatnya: loss **BCEWithLogitsLoss** dengan *label smoothing* nol koma nol lima. Optimizer **AdamW** dengan *learning rate* dua kali sepuluh pangkat minus empat, memakai *differential learning rate*. Backbone kami **bekukan tiga epoch pertama** lalu di-unfreeze, dengan *warmup* tiga epoch dilanjutkan *cosine decay*.
 
 Kami juga pakai *mixed precision*, *gradient accumulation*, dan *gradient clipping* untuk stabilitas.
 
@@ -653,13 +653,13 @@ Total kombinasi inilah yang membuat perbandingan kami **terkontrol penuh dan dap
     figure: FIGURES.inDatasetBar,
     stats: [
       {
-        value: 0.969,
+        value: 0.971,
         decimals: 3,
         label: 'AUC spatial (CDF)',
         tone: 'spatial',
       },
       {
-        value: 0.586,
+        value: 0.562,
         decimals: 3,
         label: 'AUC freq (CDF) — ≈ acak',
         tone: 'frequency',
@@ -672,7 +672,7 @@ Total kombinasi inilah yang membuat perbandingan kami **terkontrol penuh dan dap
         tone: 'spatial',
       },
       {
-        text: '**Freq nyaris setara tebakan acak**, AUC **0,55–0,59**.',
+        text: '**Freq nyaris setara tebakan acak**, AUC **≈ 0,56**.',
         icon: 'Waves',
         tone: 'frequency',
       },
@@ -687,9 +687,9 @@ Total kombinasi inilah yang membuat perbandingan kami **terkontrol penuh dan dap
 
 Kita masuk ke hasil. Mulai dari skenario **in-dataset** — model dilatih dan diuji pada dataset yang sama. *[tunjuk grafik batang in-dataset]* Ada tiga temuan di sini.
 
-Pertama, model **spasial konsisten paling unggul**. AUC-nya mencapai sekitar **nol koma sembilan tujuh** — pada Celeb-DF tepatnya nol koma sembilan enam sembilan. Artinya, dari piksel saja, XceptionNet sudah sangat baik membedakan asli dan palsu.
+Pertama, model **spasial konsisten paling unggul**. AUC-nya mencapai sekitar **nol koma sembilan tujuh** — pada Celeb-DF tepatnya nol koma sembilan tujuh satu, sementara pada FaceForensics lebih rendah, sekitar nol koma tujuh delapan. Artinya, dari piksel saja, XceptionNet sudah sangat baik membedakan asli dan palsu.
 
-Kedua, dan ini penting — cabang **frekuensi nyaris setara tebakan acak**. AUC-nya hanya di kisaran nol koma lima lima sampai nol koma lima sembilan; pada Celeb-DF nol koma lima delapan enam. Nol koma lima itu praktis seperti melempar koin.
+Kedua, dan ini penting — cabang **frekuensi nyaris setara tebakan acak**. AUC-nya hanya sekitar nol koma lima enam di kedua dataset; pada Celeb-DF tepatnya nol koma lima enam dua. Nol koma lima itu praktis seperti melempar koin.
 
 Ketiga, karena frekuensi tidak membawa informasi diskriminatif, model **hybrid pun tidak mengungguli spasial** — di semua tier sampel yang andal, dan di kedua dataset.
 
@@ -708,13 +708,13 @@ Jadi temuan pertama sudah jelas: pada kondisi in-dataset, menambahkan frekuensi 
     figure: FIGURES.crossDatasetBar,
     stats: [
       {
-        value: 0.083,
+        value: 0.074,
         decimals: 3,
         label: 'recall spatial CDF→FFPP',
         tone: 'bad',
       },
       {
-        value: 0.027,
+        value: 0.012,
         decimals: 3,
         prefix: '+',
         label: 'Δ F1 hybrid (FFPP→CDF)',
@@ -723,17 +723,17 @@ Jadi temuan pertama sudah jelas: pada kondisi in-dataset, menambahkan frekuensi 
     ],
     bullets: [
       {
-        text: 'Semua model **menurun** saat lintas dataset, AUC ke **~0,63–0,65**.',
+        text: 'Semua model **menurun** saat lintas dataset, AUC ke **~0,56–0,68**.',
         icon: 'TrendingDown',
         tone: 'warn',
       },
       {
-        text: '**Recall collapse** terparah arah **CDF→FFPP (recall ≈ 0,08)**.',
+        text: '**Recall collapse** terparah arah **CDF→FFPP (recall ≈ 0,07)**.',
         icon: 'AlertTriangle',
         tone: 'bad',
       },
       {
-        text: 'Manfaat frekuensi **parsial & bergantung arah**: drop F1 hybrid **+0,027** vs spatial **+0,116**, tetapi **tidak konsisten** pada arah sebaliknya.',
+        text: 'Manfaat frekuensi **parsial & bergantung arah**: drop F1 hybrid **+0,012** vs spatial **+0,091**, tetapi **tidak konsisten** pada arah sebaliknya.',
         icon: 'ArrowLeftRight',
         tone: 'hybrid',
       },
@@ -743,11 +743,11 @@ Jadi temuan pertama sudah jelas: pada kondisi in-dataset, menambahkan frekuensi 
 
 Sekarang skenario yang lebih menantang dan lebih realistis: **cross-dataset**. Model dilatih di satu dataset, lalu diuji di dataset yang berbeda — meniru kondisi nyata saat detektor bertemu deepfake dari sumber yang belum pernah dilihat. *[tunjuk grafik cross-dataset]*
 
-Temuan pertama: **semua model menurun**. AUC jatuh ke kisaran **nol koma enam tiga sampai nol koma enam lima**. Ini tepat menjawab kekhawatiran utama kami soal generalisasi.
+Temuan pertama: **semua model menurun**. AUC jatuh ke kisaran **nol koma lima enam sampai nol koma enam delapan**. Ini tepat menjawab kekhawatiran utama kami soal generalisasi.
 
-Yang paling mencolok adalah **recall collapse** — terutama pada arah **Celeb-DF ke FaceForensics**. Recall-nya hanya sekitar **nol koma nol delapan**. Artinya model hampir gagal total menangkap sampel palsu di domain baru.
+Yang paling mencolok adalah **recall collapse** — terutama pada arah **Celeb-DF ke FaceForensics**. Recall-nya hanya sekitar **nol koma nol tujuh**. Artinya model hampir gagal total menangkap sampel palsu di domain baru.
 
-Soal frekuensi: di sini manfaatnya **mulai terlihat, tapi parsial dan bergantung arah**. Pada arah FaceForensics ke Celeb-DF, penurunan F1 model hybrid hanya **plus nol koma nol dua tujuh**, jauh lebih kecil dibanding spasial yang turun **plus nol koma satu satu enam** — jadi hybrid lebih tahan. Tetapi keunggulan ini **tidak konsisten** pada arah sebaliknya.
+Soal frekuensi: di sini manfaatnya **mulai terlihat, tapi parsial dan bergantung arah**. Pada arah FaceForensics ke Celeb-DF, penurunan F1 model hybrid hanya **plus nol koma nol satu dua**, jauh lebih kecil dibanding spasial yang turun **plus nol koma nol sembilan satu** — jadi hybrid lebih tahan. Tetapi keunggulan ini **tidak konsisten** pada arah sebaliknya.
 
 Kesimpulannya: frekuensi hanya menahan penurunan pada satu arah, dan itu pun dengan mengorbankan performa in-dataset tadi.`,
   },
