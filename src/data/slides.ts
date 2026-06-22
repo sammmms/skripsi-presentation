@@ -34,9 +34,7 @@ export const SLIDES: Slide[] = [
       'Program Studi S-1 Teknik Informatika · Fakultas Informatika · Universitas Mikroskil, Medan',
     year: '2026',
     notes:
-      `**Cue:** Sapa penguji, sebut judul, perkenalkan tim singkat. · *±40 dtk*
-
-Selamat [pagi/siang], Bapak/Ibu penguji yang kami hormati. Perkenalkan, kami bertiga — **Naomi, Giovanny, dan Samuel**.
+      `Selamat [pagi/siang], Bapak/Ibu penguji yang kami hormati. Perkenalkan, kami bertiga — **Naomi, Giovanny, dan Samuel**.
 
 Pada kesempatan ini kami akan mempresentasikan tugas akhir kami yang berjudul **"Deteksi Deepfake: Hybrid XceptionNet–FFT vs Model Domain Tunggal"** — sebuah studi komparatif kinerja deteksi deepfake antara arsitektur **hybrid** yang menggabungkan domain spasial dan frekuensi, dengan **model domain tunggal**. Izinkan kami memulai.`,
   },
@@ -56,9 +54,7 @@ Pada kesempatan ini kami akan mempresentasikan tugas akhir kami yang berjudul **
       { label: 'Hasil & Pembahasan', sectionId: 'results' },
       { label: 'Kesimpulan & Saran', sectionId: 'conclusion' },
     ],
-    notes: `**Cue:** Sebutkan alur dalam satu kalimat, lalu lanjut — jangan berlama-lama. · *±30 dtk*
-
-Sebelum masuk ke isi, ini **alur** presentasi kami. *[tunjuk outline]* Kami mulai dari **latar belakang dan rumusan masalah**, lalu **tujuan dan hipotesis**, dilanjutkan **landasan teori** singkat.
+    notes: `Sebelum masuk ke isi, ini **alur** presentasi kami. *[tunjuk outline]* Kami mulai dari **latar belakang dan rumusan masalah**, lalu **tujuan dan hipotesis**, dilanjutkan **landasan teori** singkat.
 
 Setelah itu kami masuk ke **metodologi**, kemudian **hasil dan pembahasan** sebagai bagian inti, dan ditutup dengan **kesimpulan dan saran**. *[langsung lanjut]*`,
   },
@@ -89,9 +85,7 @@ Setelah itu kami masuk ke **metodologi**, kemudian **hasil dan pembahasan** seba
       },
     ],
     notes:
-      `**Cue:** Masalah utama bukan akurasi satu dataset, melainkan generalisasi; frekuensi diklaim sebagai solusi. · *±50 dtk*
-
-Mari kita mulai dari **latar belakang**. *[tunjuk poin]*
+      `Mari kita mulai dari **latar belakang**. *[tunjuk poin]*
 
 **Deepfake** kini makin realistis dan sudah menjadi ancaman nyata bagi forensik digital — dari misinformasi sampai penipuan. Maka kebutuhan akan **detektor yang andal** semakin penting.
 
@@ -126,9 +120,7 @@ Untuk mengatasi itu, banyak literatur mengklaim bahwa **domain frekuensi** — y
       },
     ],
     notes:
-      `**Cue:** Tegaskan celahnya — kami tidak berasumsi frekuensi pasti membantu; kami mengujinya secara adil. · *±50 dtk*
-
-Lalu di mana **celah penelitiannya**? *[tunjuk poin]*
+      `Lalu di mana **celah penelitiannya**? *[tunjuk poin]*
 
 Klaim bahwa "frekuensi lebih baik" sering diuji pada **kondisi ideal** — kompresi rendah, dan hanya *cross-manipulation* di dalam satu dataset yang sama.
 
@@ -158,9 +150,7 @@ Maka **posisi kami jelas**: ini studi **komparatif** untuk **mengukur** kontribu
       },
     ],
     notes:
-      `**Cue:** Bacakan ketiganya singkat. Tekankan ketiganya bersifat mengukur/membandingkan. · *±40 dtk*
-
-Dari celah itu kami menurunkan **tiga rumusan masalah**. *[tunjuk daftar]*
+      `Dari celah itu kami menurunkan **tiga rumusan masalah**. *[tunjuk daftar]*
 
 **Pertama**, sejauh mana detektor spasial murni — XceptionNet — **menurun performanya** saat diuji lintas dataset?
 
@@ -211,9 +201,7 @@ Perhatikan, ketiganya bersifat **mengukur dan membandingkan**, bukan mengasumsik
       ],
     },
     notes:
-      `**Cue:** Tujuan di kiri, hipotesis di kanan. Tegaskan hasil dilaporkan apa adanya, termasuk bila H0 tak tertolak. · *±50 dtk*
-
-Dari rumusan masalah, ini **tujuan dan hipotesis** kami. *[tunjuk dua kolom]*
+      `Dari rumusan masalah, ini **tujuan dan hipotesis** kami. *[tunjuk dua kolom]*
 
 Di sisi **tujuan**: kami **mengimplementasikan** model hybrid XceptionNet–FFT; melakukan **ablation** — membandingkan spasial, frekuensi, dan hybrid; lalu **mengevaluasi generalisasi** baik in-dataset maupun cross-dataset.
 
@@ -248,9 +236,7 @@ Yang ingin saya tekankan: hipotesis ini kami uji **secara empiris** dan kami lap
       { text: 'Ukuran sampel 100–750 video, **3 seed**.', icon: 'Dices' },
     ],
     notes:
-      `**Cue:** Sebutkan singkat; ini sekaligus menyiapkan jawaban untuk pertanyaan keterbatasan. · *±45 dtk*
-
-Sebelum lanjut, ini **batasan penelitian** kami — sengaja kami tegaskan supaya ruang lingkupnya jelas. *[tunjuk poin]*
+      `Sebelum lanjut, ini **batasan penelitian** kami — sengaja kami tegaskan supaya ruang lingkupnya jelas. *[tunjuk poin]*
 
 Pertama, analisis kami pada **level frame**, tanpa pemodelan temporal antar-frame. Kedua, kami memakai **dua dataset benchmark**: FaceForensics++ dan Celeb-DF versi dua. Ketiga, domain frekuensi kami wakili dengan **magnitudo FFT** saja — **tanpa fase**. Keempat, ukuran sampel **seratus sampai tujuh ratus lima puluh** video, dengan **tiga seed**.
 
@@ -285,9 +271,7 @@ Pertama, analisis kami pada **level frame**, tanpa pemodelan temporal antar-fram
       },
     ],
     notes:
-      `**Cue:** Pakai analogi — spasial melihat yang tampak, frekuensi melihat pola tak kasat mata. · *±55 dtk*
-
-Masuk ke **landasan teori**. Ada dua cara memandang sebuah citra. *[tunjuk gambar spektrum]*
+      `Masuk ke **landasan teori**. Ada dua cara memandang sebuah citra. *[tunjuk gambar spektrum]*
 
 **Domain spasial** melihat **nilai piksel secara langsung** — tekstur, blending, warna. Inilah yang ditangkap XceptionNet.
 
@@ -329,9 +313,7 @@ Mengapa relevan? Karena **artefak GAN**: proses *up-sampling* gagal mereplikasi 
         tone: 'hybrid',
       },
     ],
-    notes: `**Cue:** Empat komponen inilah yang kami rakit menjadi model hybrid. · *±45 dtk*
-
-Dari teori itu, ini **empat komponen** yang kami pakai untuk merakit model. *[tunjuk dua kolom]*
+    notes: `Dari teori itu, ini **empat komponen** yang kami pakai untuk merakit model. *[tunjuk dua kolom]*
 
 **XceptionNet** — backbone spasial, memakai *depthwise separable convolution*, dan sudah *pretrained* pada ImageNet.
 
@@ -389,9 +371,7 @@ Empat komponen inilah yang kami rakit menjadi **model hybrid** yang akan kita li
     ],
     note: 'Split per-video mencegah kebocoran data antara latih dan uji.',
     notes:
-      `**Cue:** Jelaskan perjalanan satu video dari awal sampai jadi keputusan. Tekankan split per-video untuk mencegah kebocoran. · *±55 dtk*
-
-Sekarang kita masuk ke **metodologi**. Slide ini menunjukkan alur penelitian secara utuh — perjalanan satu video dari awal hingga menjadi sebuah keputusan. *[tunjuk diagram alur]*
+      `Sekarang kita masuk ke **metodologi**. Slide ini menunjukkan alur penelitian secara utuh — perjalanan satu video dari awal hingga menjadi sebuah keputusan. *[tunjuk diagram alur]*
 
 Kita mulai dari **video**. Dari tiap video kita **cuplik frame pada lima FPS**. Setiap frame lalu dideteksi wajahnya dan **di-crop dengan MTCNN** ke ukuran **224 kali 224** piksel.
 
@@ -442,9 +422,7 @@ Dari sini kita latih **tiga model** — spasial, frekuensi, dan hybrid — dan k
       },
     ],
     notes:
-      `**Cue:** Dua dataset ini memungkinkan kami menguji generalisasi pada generator dan kondisi rekaman berbeda (kedua dataset memakai subset seimbang 375/375 = 750 video, sesuai Tabel 3.1). · *±55 dtk*
-
-Kami memakai **dua dataset benchmark**. *[tunjuk tabel]*
+      `Kami memakai **dua dataset benchmark**. *[tunjuk tabel]*
 
 Yang pertama, **FaceForensics++** — kami singkat FFPP. Kami pakai **subset seimbang 750 video**, 375 asli dan 375 palsu, dengan **empat metode manipulasi**, pada tingkat kompresi c23.
 
@@ -487,9 +465,7 @@ Kedua, kami melakukan **evaluasi cross-dataset**: model dilatih di satu dataset 
       },
     ],
     notes:
-      `**Cue:** Tekankan baris terakhir (hanya magnitudo, fase tidak dipakai) — relevan ke pembahasan kegagalan frekuensi di Slide 19. · *±55 dtk*
-
-Slide ini merinci tahap **preprocessing**. *[tunjuk gambar spektrum FFT real vs fake]*
+      `Slide ini merinci tahap **preprocessing**. *[tunjuk gambar spektrum FFT real vs fake]*
 
 Pertama, **ekstraksi frame** pada lima FPS, maksimal lima puluh frame per video.
 
@@ -537,9 +513,7 @@ Dan satu hal yang ingin saya tekankan — ini akan relevan nanti di pembahasan: 
       },
     ],
     notes:
-      `**Cue:** Ketiga model berbagi komponen yang sama supaya perbandingannya adil dan kami bisa mengisolasi kontribusi tiap domain. · *±65 dtk*
-
-Ini **arsitektur** dari ketiga model yang kami bandingkan. *[tunjuk diagram dua cabang]*
+      `Ini **arsitektur** dari ketiga model yang kami bandingkan. *[tunjuk diagram dua cabang]*
 
 Model pertama, **Spatial**. Murni cabang spasial: citra RGB masuk ke **XceptionNet**, langsung menghasilkan logit. Sekitar **22,8 juta** parameter.
 
@@ -584,9 +558,7 @@ Kuncinya: **ketiga model berbagi komponen yang sama**. Dengan begitu perbandinga
         tone: 'good',
       },
     ],
-    notes: `**Cue:** Lewati cepat, ini bukti rigor. Siapkan detail jika ditanya. · *±50 dtk — tempo cepat*
-
-Strategi pelatihan saya **lewati cepat** — ini lebih ke bukti rigor, dan saya siap merinci bila Bapak/Ibu penguji ingin. *[tunjuk kurva learning rate]*
+    notes: `Strategi pelatihan saya **lewati cepat** — ini lebih ke bukti rigor, dan saya siap merinci bila Bapak/Ibu penguji ingin. *[tunjuk kurva learning rate]*
 
 Singkatnya: loss **BCEWithLogitsLoss** dengan *label smoothing* nol koma nol lima. Optimizer **AdamW** dengan *learning rate* dua kali sepuluh pangkat minus empat, memakai *differential learning rate*. Backbone kami **bekukan tiga epoch pertama** lalu di-unfreeze, dengan *warmup* tiga epoch dilanjutkan *cosine decay*.
 
@@ -628,9 +600,7 @@ Dan yang penting untuk reproduktibilitas: **model terbaik dipilih berdasarkan AU
       },
     ],
     notes:
-      `**Cue:** Total kombinasi ini membuat perbandingan kami terkontrol dan dapat direproduksi. · *±55 dtk*
-
-Terakhir di metodologi, **desain eksperimen** — bagaimana semua faktor ini dikombinasikan. *[tunjuk tabel]*
+      `Terakhir di metodologi, **desain eksperimen** — bagaimana semua faktor ini dikombinasikan. *[tunjuk tabel]*
 
 Ada lima dimensi: **tiga model** — spasial, frekuensi, hybrid; **dua dataset** — FFPP dan CDF; **empat ukuran sampel** — seratus, dua ratus lima puluh, lima ratus, dan tujuh ratus lima puluh; **tiga seed**; dan **dua skenario evaluasi** — in-dataset dan cross-dataset.
 
@@ -683,9 +653,7 @@ Total kombinasi inilah yang membuat perbandingan kami **terkontrol penuh dan dap
       },
     ],
     notes:
-      `**Cue:** Temuan pertama sudah jelas — menambahkan frekuensi tidak menaikkan performa in-dataset. · *±50 dtk*
-
-Kita masuk ke hasil. Mulai dari skenario **in-dataset** — model dilatih dan diuji pada dataset yang sama. *[tunjuk grafik batang in-dataset]* Ada tiga temuan di sini.
+      `Kita masuk ke hasil. Mulai dari skenario **in-dataset** — model dilatih dan diuji pada dataset yang sama. *[tunjuk grafik batang in-dataset]* Ada tiga temuan di sini.
 
 Pertama, model **spasial konsisten paling unggul**. AUC-nya mencapai sekitar **nol koma sembilan tujuh** — pada Celeb-DF tepatnya nol koma sembilan tujuh satu, sementara pada FaceForensics lebih rendah, sekitar nol koma tujuh delapan. Artinya, dari piksel saja, XceptionNet sudah sangat baik membedakan asli dan palsu.
 
@@ -739,9 +707,7 @@ Jadi temuan pertama sudah jelas: pada kondisi in-dataset, menambahkan frekuensi 
       },
     ],
     notes:
-      `**Cue:** Frekuensi hanya menahan penurunan pada satu arah, dan itu pun dengan mengorbankan performa in-dataset. · *±60 dtk*
-
-Sekarang skenario yang lebih menantang dan lebih realistis: **cross-dataset**. Model dilatih di satu dataset, lalu diuji di dataset yang berbeda — meniru kondisi nyata saat detektor bertemu deepfake dari sumber yang belum pernah dilihat. *[tunjuk grafik cross-dataset]*
+      `Sekarang skenario yang lebih menantang dan lebih realistis: **cross-dataset**. Model dilatih di satu dataset, lalu diuji di dataset yang berbeda — meniru kondisi nyata saat detektor bertemu deepfake dari sumber yang belum pernah dilihat. *[tunjuk grafik cross-dataset]*
 
 Temuan pertama: **semua model menurun**. AUC jatuh ke kisaran **nol koma lima enam sampai nol koma enam delapan**. Ini tepat menjawab kekhawatiran utama kami soal generalisasi.
 
@@ -785,9 +751,7 @@ Kesimpulannya: frekuensi hanya menahan penurunan pada satu arah, dan itu pun den
       },
     ],
     notes:
-      `**Cue:** Cabang frekuensi bukan kurang optimal di akhir — ia memang tidak pernah belajar. · *±55 dtk*
-
-Temuan ketiga menjawab satu kemungkinan keberatan: apakah cabang frekuensi mungkin hanya **kekurangan data**? *[tunjuk kurva AUC vs ukuran sampel]*
+      `Temuan ketiga menjawab satu kemungkinan keberatan: apakah cabang frekuensi mungkin hanya **kekurangan data**? *[tunjuk kurva AUC vs ukuran sampel]*
 
 Kami memvariasikan ukuran sampel. Tren AUC model **spasial naik stabil** seiring bertambahnya data — perilaku belajar yang sehat. Sebaliknya, cabang **frekuensi tetap datar** di sekitar level acak di **seluruh tier** — dari sampel kecil sampai besar.
 
@@ -825,9 +789,7 @@ Jadi intinya: cabang frekuensi bukan kurang optimal di tahap akhir — **ia mema
         tone: 'neutral',
       },
     ],
-    notes: `**Cue:** Ini slide inti pertahanan. Kuasai keempatnya. · *±75 dtk — pelan, percaya diri*
-
-Ini bagian terpenting dari pembahasan kami. Kami **tidak berhenti pada "frekuensi gagal"** — kami menjelaskan **mengapa**, dan kami menemukan empat penyebab yang saling menguatkan.
+    notes: `Ini bagian terpenting dari pembahasan kami. Kami **tidak berhenti pada "frekuensi gagal"** — kami menjelaskan **mengapa**, dan kami menemukan empat penyebab yang saling menguatkan.
 
 **Pertama, artefak frekuensinya rusak oleh praproses.** Crop wajah dengan MTCNN dan kompresi video c23 sama-sama menekan komponen frekuensi tinggi — padahal justru di situlah artefak deepfake biasanya berada. Ini sejalan dengan temuan **Mejri**.
 
@@ -866,9 +828,7 @@ Empat hal inilah yang menjelaskan kegagalan tersebut secara menyeluruh — dan m
       },
     ],
     notes:
-      `**Cue:** Kami melengkapi literatur dengan menandai kapan frekuensi gagal membantu. · *±55 dtk*
-
-Lalu, bagaimana posisi temuan kami terhadap literatur yang justru memuji domain frekuensi?
+      `Lalu, bagaimana posisi temuan kami terhadap literatur yang justru memuji domain frekuensi?
 
 Kami menegaskan: ini **bukan kontradiksi, melainkan kondisi batas** — *boundary condition*. Artefak frekuensi memang **tetap ada**, sebagaimana ditunjukkan **Durall dan Zhang**. Yang kami tunjukkan adalah bahwa **mengeksploitasinya bersifat kondisional** — tergantung representasi, skema fusi, dan tingkat kesulitan pengujian.
 
@@ -914,9 +874,7 @@ Jadi kami tidak menyangkal literatur — kami **melengkapinya**, dengan menandai
       },
     ],
     notes:
-      `**Cue:** Tunjukkan Gambar 4.1 & 4.2 (atau demo live bila diizinkan). · *±55 dtk*
-
-Untuk membuat temuan ini konkret, kami membangun sebuah **purwarupa**. *[tunjuk Gambar 4.1 — antarmuka demo]*
+      `Untuk membuat temuan ini konkret, kami membangun sebuah **purwarupa**. *[tunjuk Gambar 4.1 — antarmuka demo]*
 
 Ini aplikasi **Gradio** yang kami hosting di **Hugging Face Spaces**. Pengguna mengunggah gambar, dan ketiga model — spasial, frekuensi, dan hybrid — memberikan **verdict berdampingan**, sehingga perbedaannya langsung terlihat.
 
@@ -951,9 +909,7 @@ Dan di sinilah bukti kualitatifnya: **spektrum FFT untuk wajah asli dan palsu ny
       },
     ],
     notes:
-      `**Cue:** Secara keseluruhan, pada konfigurasi yang diuji, kontribusi domain frekuensi terbatas dan generalisasi lintas dataset tetap menjadi tantangan terbuka. · *±60 dtk*
-
-Mari kita rangkum, menjawab langsung ketiga rumusan masalah.
+      `Mari kita rangkum, menjawab langsung ketiga rumusan masalah.
 
 **Rumusan Masalah 1** — sejauh mana detektor spasial menurun lintas dataset? Jawabannya: **menurun secara substansial**. Terjadi *recall collapse*, paling parah pada arah Celeb-DF ke FaceForensics.
 
@@ -995,9 +951,7 @@ Secara keseluruhan, pada konfigurasi yang kami uji, kontribusi domain frekuensi 
         tone: 'neutral',
       },
     ],
-    notes: `**Cue:** Sambungkan tiap saran ke akar penyebab di Slide 19. · *±60 dtk*
-
-Dari empat akar penyebab di slide pembahasan tadi, kami menurunkan saran yang **konkret** — bukan sekadar daftar umum.
+    notes: `Dari empat akar penyebab di slide pembahasan tadi, kami menurunkan saran yang **konkret** — bukan sekadar daftar umum.
 
 **Pertama, perkuat cabang frekuensi:** sertakan informasi **fase** — misalnya pendekatan SPSL; hitung **FFT pada frame penuh**, bukan hanya crop wajah; dan lakukan **analisis multi-skala**. Ini langsung menjawab penyebab pertama dan kedua.
 
@@ -1038,9 +992,7 @@ Jadi setiap saran tersambung langsung ke akar penyebab yang sudah kami identifik
     ],
     thanks: 'Terima kasih',
     qr: true,
-    notes: `**Cue:** Tegaskan nilai hasil negatif sebagai kontribusi, ucapkan terima kasih, undang pertanyaan. · *±50 dtk*
-
-Sebagai **penutup**, izinkan kami merangkum **kontribusi ilmiah** penelitian ini. *[tunjuk poin]*
+    notes: `Sebagai **penutup**, izinkan kami merangkum **kontribusi ilmiah** penelitian ini. *[tunjuk poin]*
 
 Pertama, sebuah **studi komparatif yang terkontrol** — tiga model, dua dataset, tiga seed — lengkap dengan **evaluasi cross-dataset**. Kedua, **bukti kuantitatif** bahwa kontribusi domain frekuensi **terbatas dan kondisional**. Ketiga, **analisis akar penyebab** beserta posisinya terhadap literatur.
 
