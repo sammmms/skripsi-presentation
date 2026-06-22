@@ -990,7 +990,7 @@ Secara keseluruhan, pada konfigurasi yang kami uji, kontribusi domain frekuensi 
         tone: 'neutral',
       },
       {
-        text: '**Adaptasi domain eksplisit** + **uji signifikansi statistik** + **pemodelan temporal**.',
+        text: '**Perkuat validitas & cakupan:** adaptasi domain eksplisit, uji signifikansi statistik, pemodelan temporal, serta perbanyak data & variasi kompresi.',
         icon: 'Layers',
         tone: 'neutral',
       },
@@ -1005,7 +1005,9 @@ Dari empat akar penyebab di slide pembahasan tadi, kami menurunkan saran yang **
 
 **Ketiga, eksplorasi domain transformasi alternatif** seperti **DCT atau wavelet**, yang representasinya bisa lebih kaya daripada FFT mentah.
 
-**Keempat, untuk memperkuat validitas:** adaptasi domain secara eksplisit untuk masalah generalisasi, **uji signifikansi statistik** untuk klaim yang lebih kuat, serta **pemodelan temporal** antar-frame yang berada di luar batasan penelitian ini.
+**Keempat, untuk memperkuat validitas dan cakupan:** adaptasi domain secara eksplisit untuk masalah generalisasi, **uji signifikansi statistik** untuk klaim yang lebih kuat, **pemodelan temporal** antar-frame, serta **memperbanyak data pelatihan dan variasi tingkat kompresi** — yang berada di luar batasan penelitian ini.
+
+Dan satu catatan praktis: untuk kebutuhan penerapan saat ini, **baseline spasial XceptionNet tetap menjadi pilihan paling andal** — peningkatan generalisasi lintas dataset masih memerlukan penelitian lanjutan.
 
 Jadi setiap saran tersambung langsung ke akar penyebab yang sudah kami identifikasi.`,
   },
